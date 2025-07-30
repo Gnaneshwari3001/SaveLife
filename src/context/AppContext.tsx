@@ -10,6 +10,7 @@ interface AppContextType {
   addDonor: (donor: Omit<Donor, 'id'>) => void;
   addRequest: (request: Omit<Request, 'id' | 'status'>) => void;
   updateRequestStatus: (id: string, status: 'Pending' | 'Fulfilled') => void;
+  addBank: (bank: Omit<Bank, 'id'>) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -39,9 +40,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const updateRequestStatus = (id: string, status: 'Pending' | 'Fulfilled') => {
     setRequests(prev => prev.map(r => r.id === id ? { ...r, status } : r));
   };
+  
+  const addBank = (bank: Omit<Bank, 'id'>) => {
+    const newBank = {
+      ...bank,
+      id: `B${String(banks.length + 1).padStart(3, '0')}`,
+    };
+    setBanks(prev => [...prev, newBank]);
+  };
 
   return (
-    <AppContext.Provider value={{ donors, requests, banks, addDonor, addRequest, updateRequestStatus }}>
+    <AppContext.Provider value={{ donors, requests, banks, addDonor, addRequest, updateRequestStatus, addBank }}>
       {children}
     </AppContext.Provider>
   );

@@ -1,4 +1,5 @@
 "use client"
+import { useState } from "react";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,14 +8,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PlusCircle } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
+import { toast } from "@/hooks/use-toast";
 
 export default function BanksPage() {
-  const { banks } = useAppContext();
+  const { banks, addBank } = useAppContext();
+  const [newBankName, setNewBankName] = useState("");
+  const [newBankLocation, setNewBankLocation] = useState("");
+  const [newBankContact, setNewBankContact] = useState("");
 
   const handleAddBank = (e: React.FormEvent) => {
     e.preventDefault();
-    // Logic to add a new bank would go here
-    alert("This is a mock UI. Adding banks is not implemented.");
+    if (!newBankName || !newBankLocation || !newBankContact) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill out all fields to add a new bank.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    addBank({
+      name: newBankName,
+      location: newBankLocation,
+      contact: newBankContact,
+    });
+
+    toast({
+      title: "Bank Added",
+      description: `${newBankName} has been successfully added.`,
+    });
+
+    setNewBankName("");
+    setNewBankLocation("");
+    setNewBankContact("");
   };
 
   return (
@@ -59,15 +85,30 @@ export default function BanksPage() {
               <form onSubmit={handleAddBank} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="bank-name">Bank Name</Label>
-                  <Input id="bank-name" placeholder="e.g., Unity Blood Center" />
+                  <Input 
+                    id="bank-name" 
+                    placeholder="e.g., Unity Blood Center" 
+                    value={newBankName}
+                    onChange={(e) => setNewBankName(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="bank-location">Location</Label>
-                  <Input id="bank-location" placeholder="e.g., Springfield, IL" />
+                  <Input 
+                    id="bank-location" 
+                    placeholder="e.g., Springfield, IL" 
+                    value={newBankLocation}
+                    onChange={(e) => setNewBankLocation(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="bank-contact">Contact Info</Label>
-                  <Input id="bank-contact" placeholder="e.g., 555-555-5555" />
+                  <Input 
+                    id="bank-contact" 
+                    placeholder="e.g., 555-555-5555" 
+                    value={newBankContact}
+                    onChange={(e) => setNewBankContact(e.target.value)}
+                  />
                 </div>
                 <Button type="submit" className="w-full">
                   <PlusCircle className="h-4 w-4 mr-2" /> Add Bank
