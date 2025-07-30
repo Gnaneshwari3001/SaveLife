@@ -27,6 +27,7 @@ import { format } from "date-fns"
 import { toast } from "@/hooks/use-toast"
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { mockDonors } from "@/lib/data";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -63,11 +64,20 @@ export default function DonatePage() {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
     const canDonate = values.age >= 18 && values.age <= 65 && isBefore(values.lastDonationDate, addDays(new Date(), -56));
     setIsEligible(canDonate);
 
     if (canDonate) {
+      const newDonor = {
+        id: `D${String(mockDonors.length + 1).padStart(3, '0')}`,
+        name: values.name,
+        bloodGroup: values.bloodGroup,
+        lastDonation: format(values.lastDonationDate, "yyyy-MM-dd"),
+        email: values.email,
+        phone: values.phone,
+      };
+      mockDonors.push(newDonor);
+      
       toast({
         title: "Registration Successful!",
         description: `Thank you, ${values.name}. Your donation form has been submitted. We will contact you shortly.`,
