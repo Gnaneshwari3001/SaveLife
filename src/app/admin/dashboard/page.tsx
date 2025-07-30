@@ -5,11 +5,13 @@ import { Users, Heart, Building, CheckCircle } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { useAppContext } from "@/context/AppContext"
+import { useMemo } from "react"
 
 export default function AdminDashboardPage() {
   const { donors, requests, banks } = useAppContext();
-  const pendingRequests = requests.filter(r => r.status === 'Pending');
-  const fulfilledRequests = requests.filter(r => r.status === 'Fulfilled');
+
+  const pendingRequests = useMemo(() => requests.filter(r => r.status === 'Pending'), [requests]);
+  const fulfilledRequests = useMemo(() => requests.filter(r => r.status === 'Fulfilled'), [requests]);
 
   return (
     <AdminLayout>

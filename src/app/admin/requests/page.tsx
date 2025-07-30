@@ -6,12 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
+import { toast } from "@/hooks/use-toast";
 
 export default function RequestsPage() {
     const { requests, updateRequestStatus } = useAppContext();
 
-    const markFulfilled = (id: string) => {
+    const markFulfilled = (id: string, patientName: string) => {
         updateRequestStatus(id, 'Fulfilled');
+        toast({
+            title: "Request Fulfilled",
+            description: `The request for ${patientName} has been marked as fulfilled.`,
+        });
     }
 
   return (
@@ -44,13 +49,13 @@ export default function RequestsPage() {
                     <TableCell>{request.units}</TableCell>
                     <TableCell>{request.hospital}</TableCell>
                     <TableCell>
-                      <Badge variant={request.status === 'Fulfilled' ? 'default' : 'destructive'}>
+                      <Badge variant={request.status === 'Fulfilled' ? 'default' : (request.status === 'Pending' ? 'destructive' : 'secondary')}>
                         {request.status}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       {request.status === 'Pending' && (
-                        <Button variant="outline" size="sm" onClick={() => markFulfilled(request.id)}>
+                        <Button variant="outline" size="sm" onClick={() => markFulfilled(request.id, request.patientName)}>
                            <CheckCircle className="h-4 w-4 mr-2" /> Mark Fulfilled
                         </Button>
                       )}
