@@ -20,6 +20,7 @@ import { LifeBuoy } from "lucide-react"
 import MainLayout from "@/components/layout/MainLayout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "@/hooks/use-toast"
+import { mockRequests } from "@/lib/data"
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -46,6 +47,17 @@ export default function RequestPage() {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    const newRequest = {
+        id: `R${String(mockRequests.length + 1).padStart(3, '0')}`,
+        patientName: values.name,
+        bloodGroup: values.bloodGroup,
+        units: values.quantity,
+        hospital: values.hospitalName,
+        status: 'Pending',
+        urgency: values.urgency as 'Urgent' | 'Standard' | 'Within a Week',
+    };
+    mockRequests.push(newRequest);
+    
     console.log(values)
     toast({
       title: "Request Submitted Successfully!",
