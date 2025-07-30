@@ -27,7 +27,8 @@ import { format } from "date-fns"
 import { toast } from "@/hooks/use-toast"
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { mockDonors } from "@/lib/data";
+import { useAppContext } from "@/context/AppContext";
+import type { Donor } from "@/lib/data";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -50,6 +51,7 @@ const formSchema = z.object({
 
 export default function DonatePage() {
   const [isEligible, setIsEligible] = useState<boolean | null>(null);
+  const { addDonor } = useAppContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,15 +70,14 @@ export default function DonatePage() {
     setIsEligible(canDonate);
 
     if (canDonate) {
-      const newDonor = {
-        id: `D${String(mockDonors.length + 1).padStart(3, '0')}`,
+      const newDonor: Omit<Donor, 'id'> = {
         name: values.name,
         bloodGroup: values.bloodGroup,
         lastDonation: format(values.lastDonationDate, "yyyy-MM-dd"),
         email: values.email,
         phone: values.phone,
       };
-      mockDonors.push(newDonor);
+      addDonor(newDonor);
       
       toast({
         title: "Registration Successful!",

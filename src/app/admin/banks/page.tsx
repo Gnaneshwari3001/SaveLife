@@ -2,17 +2,19 @@
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { mockBanks } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PlusCircle } from "lucide-react";
+import { useAppContext } from "@/context/AppContext";
 
 export default function BanksPage() {
+  const { banks } = useAppContext();
+
   const handleAddBank = (e: React.FormEvent) => {
     e.preventDefault();
     // Logic to add a new bank would go here
-    alert("New blood bank added (simulated).");
+    alert("This is a mock UI. Adding banks is not implemented.");
   };
 
   return (
@@ -34,7 +36,7 @@ export default function BanksPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockBanks.map((bank) => (
+                  {banks.map((bank) => (
                     <TableRow key={bank.id}>
                       <TableCell>{bank.id}</TableCell>
                       <TableCell className="font-medium">{bank.name}</TableCell>

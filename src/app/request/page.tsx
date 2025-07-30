@@ -20,7 +20,8 @@ import { LifeBuoy } from "lucide-react"
 import MainLayout from "@/components/layout/MainLayout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "@/hooks/use-toast"
-import { mockRequests } from "@/lib/data"
+import { useAppContext } from "@/context/AppContext"
+import type { Request } from "@/lib/data"
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -34,6 +35,7 @@ const formSchema = z.object({
 });
 
 export default function RequestPage() {
+  const { addRequest } = useAppContext();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -47,18 +49,15 @@ export default function RequestPage() {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const newRequest = {
-        id: `R${String(mockRequests.length + 1).padStart(3, '0')}`,
+    const newRequest: Omit<Request, 'id' | 'status'> = {
         patientName: values.name,
         bloodGroup: values.bloodGroup,
         units: values.quantity,
         hospital: values.hospitalName,
-        status: 'Pending',
         urgency: values.urgency as 'Urgent' | 'Standard' | 'Within a Week',
     };
-    mockRequests.push(newRequest);
+    addRequest(newRequest);
     
-    console.log(values)
     toast({
       title: "Request Submitted Successfully!",
       description: `Your request for ${values.quantity} unit(s) of ${values.bloodGroup} blood has been broadcasted. We will notify you when a donor is found.`,

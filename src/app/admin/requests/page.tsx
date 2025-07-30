@@ -2,17 +2,16 @@
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { mockRequests } from "@/lib/data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
-import React from "react";
+import { useAppContext } from "@/context/AppContext";
 
 export default function RequestsPage() {
-    const [requests, setRequests] = React.useState(mockRequests);
+    const { requests, updateRequestStatus } = useAppContext();
 
     const markFulfilled = (id: string) => {
-        setRequests(requests.map(r => r.id === id ? { ...r, status: 'Fulfilled' } : r));
+        updateRequestStatus(id, 'Fulfilled');
     }
 
   return (

@@ -1,13 +1,15 @@
+"use client"
 import AdminLayout from "@/components/layout/AdminLayout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, Heart, Building, CheckCircle } from "lucide-react"
-import { mockDonors, mockRequests, mockBanks } from "@/lib/data"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { useAppContext } from "@/context/AppContext"
 
 export default function AdminDashboardPage() {
-  const pendingRequests = mockRequests.filter(r => r.status === 'Pending');
-  const fulfilledRequests = mockRequests.filter(r => r.status === 'Fulfilled');
+  const { donors, requests, banks } = useAppContext();
+  const pendingRequests = requests.filter(r => r.status === 'Pending');
+  const fulfilledRequests = requests.filter(r => r.status === 'Fulfilled');
 
   return (
     <AdminLayout>
@@ -20,7 +22,7 @@ export default function AdminDashboardPage() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockDonors.length}</div>
+              <div className="text-2xl font-bold">{donors.length}</div>
             </CardContent>
           </Card>
           <Card>
@@ -47,7 +49,7 @@ export default function AdminDashboardPage() {
               <Building className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockBanks.length}</div>
+              <div className="text-2xl font-bold">{banks.length}</div>
             </CardContent>
           </Card>
         </div>
