@@ -29,6 +29,7 @@ import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAppContext } from "@/context/AppContext";
 import type { Donor } from "@/lib/data";
+import { sendDonorConfirmationEmail } from "@/ai/flows/send-email-flow";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -65,7 +66,7 @@ export default function DonatePage() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     const canDonate = values.age >= 18 && values.age <= 65 && isBefore(values.lastDonationDate, addDays(new Date(), -56));
     setIsEligible(canDonate);
 
@@ -78,12 +79,22 @@ export default function DonatePage() {
         phone: values.phone,
       };
       addDonor(newDonor);
+
+      try {
+        await sendDonorConfirmationEmail({name: values.name, email: values.email});
+        toast({
+          title: "Registration Successful!",
+          description: `Thank you, ${values.name}. A confirmation email has been sent.`,
+          variant: "default"
+        })
+      } catch (error) {
+         toast({
+          title: "Registration Successful!",
+          description: `Thank you, ${values.name}. Your donation form has been submitted. We will contact you shortly. (Email failed to send)`,
+          variant: "default"
+        })
+      }
       
-      toast({
-        title: "Registration Successful!",
-        description: `Thank you, ${values.name}. Your donation form has been submitted. We will contact you shortly.`,
-        variant: "default"
-      })
       form.reset();
     } else {
        toast({
