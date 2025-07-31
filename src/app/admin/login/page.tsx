@@ -22,7 +22,7 @@ import { toast } from "@/hooks/use-toast"
 export default function AdminLoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState("admin@example.com");
-  const [password, setPassword] = useState("admin@example.com");
+  const [password, setPassword] = useState("Admin123");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
