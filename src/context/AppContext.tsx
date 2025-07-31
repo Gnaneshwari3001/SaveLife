@@ -1,6 +1,8 @@
 "use client"
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { database } from '@/lib/firebase';
+import { ref, onValue, push, set, update } from 'firebase/database';
 import { mockDonors, mockRequests, mockBanks, Donor, Request, Bank } from '@/lib/data';
 
 interface AppContextType {
@@ -16,37 +18,94 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [donors, setDonors] = useState<Donor[]>(mockDonors);
-  const [requests, setRequests] = useState<Request[]>(mockRequests);
-  const [banks, setBanks] = useState<Bank[]>(mockBanks);
+  const [donors, setDonors] = useState<Donor[]>([]);
+  const [requests, setRequests] = useState<Request[]>([]);
+  const [banks, setBanks] = useState<Bank[]>([]);
+
+  useEffect(() => {
+    const donorsRef = ref(database, 'donors');
+    const requestsRef = ref(database, 'requests');
+    const banksRef = ref(database, 'banks');
+
+    const donorsListener = onValue(donorsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const donorsList = Object.keys(data).map(key => ({ ...data[key], id: key }));
+        setDonors(donorsList);
+      } else {
+        // If no data, populate with mock data
+        mockDonors.forEach(donor => {
+            const newDonorRef = push(donorsRef);
+            set(newDonorRef, { ...donor, id: newDonorRef.key });
+        });
+      }
+    });
+
+    const requestsListener = onValue(requestsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const requestsList = Object.keys(data).map(key => ({ ...data[key], id: key }));
+        setRequests(requestsList);
+      } else {
+         mockRequests.forEach(request => {
+            const newRequestRef = push(requestsRef);
+            set(newRequestRef, { ...request, id: newRequestRef.key });
+        });
+      }
+    });
+
+    const banksListener = onValue(banksRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const banksList = Object.keys(data).map(key => ({ ...data[key], id: key }));
+        setBanks(banksList);
+      } else {
+        mockBanks.forEach(bank => {
+            const newBankRef = push(banksRef);
+            set(newBankRef, { ...bank, id: newBankRef.key });
+        });
+      }
+    });
+
+    return () => {
+      donorsListener();
+      requestsListener();
+      banksListener();
+    };
+  }, []);
+
 
   const addDonor = (donor: Omit<Donor, 'id'>) => {
-    const newDonor = {
+    const donorsRef = ref(database, 'donors');
+    const newDonorRef = push(donorsRef);
+    set(newDonorRef, {
       ...donor,
-      id: `D${String(donors.length + 1).padStart(3, '0')}`,
-    };
-    setDonors(prev => [...prev, newDonor]);
+      id: newDonorRef.key
+    });
   };
 
   const addRequest = (request: Omit<Request, 'id' | 'status'>) => {
-    const newRequest = {
+    const requestsRef = ref(database, 'requests');
+    const newRequestRef = push(requestsRef);
+    set(newRequestRef, {
       ...request,
-      id: `R${String(requests.length + 1).padStart(3, '0')}`,
+      id: newRequestRef.key,
       status: 'Pending' as const,
-    };
-    setRequests(prev => [...prev, newRequest]);
+    });
   };
 
   const updateRequestStatus = (id: string, status: 'Pending' | 'Fulfilled') => {
-    setRequests(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+    const requestRef = ref(database, `requests/${id}`);
+    update(requestRef, { status });
   };
   
   const addBank = (bank: Omit<Bank, 'id'>) => {
-    const newBank = {
-      ...bank,
-      id: `B${String(banks.length + 1).padStart(3, '0')}`,
-    };
-    setBanks(prev => [...prev, newBank]);
+    const banksRef = ref(database, 'banks');
+    const newBankRef = push(banksRef);
+    set(newBankRef, {
+        ...bank,
+        id: newBankRef.key
+    });
   };
 
   return (
