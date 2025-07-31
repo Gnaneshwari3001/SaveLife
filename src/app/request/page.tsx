@@ -1,3 +1,4 @@
+
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -54,7 +55,7 @@ export default function RequestPage() {
         bloodGroup: values.bloodGroup,
         units: values.quantity,
         hospital: values.hospitalName,
-        urgency: values.urgency as 'Urgent' | 'Standard' | 'Within a Week',
+        urgency: values.urgency,
     };
     addRequest(newRequest);
     

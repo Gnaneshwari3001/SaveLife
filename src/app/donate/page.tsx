@@ -1,3 +1,4 @@
+
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -107,6 +108,7 @@ export default function DonatePage() {
       }
       
       form.reset();
+      setIsEligible(true);
     } else {
        toast({
         title: "Not Eligible to Donate",
