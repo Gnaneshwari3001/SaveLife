@@ -61,13 +61,12 @@ const Carousel = React.forwardRef<
     },
     ref
   ) => {
-    const defaultPlugins = autoplayDelay ? [Autoplay({ delay: autoplayDelay, stopOnInteraction: false })] : []
     const [carouselRef, api] = useEmblaCarousel(
       {
         ...opts,
         axis: orientation === "horizontal" ? "x" : "y",
       },
-      plugins || defaultPlugins
+      plugins || (autoplayDelay ? [Autoplay({ delay: autoplayDelay, stopOnInteraction: false })] : [])
     )
     const [canScrollPrev, setCanScrollPrev] = React.useState(false)
     const [canScrollNext, setCanScrollNext] = React.useState(false)

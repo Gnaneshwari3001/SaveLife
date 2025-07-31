@@ -5,7 +5,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { database, auth } from '@/lib/firebase';
 import { ref, onValue, push, set, get, update, remove } from 'firebase/database';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
-import { mockDonors, mockRequests, mockBanks, Donor, Request, Bank } from '@/lib/data';
+import { Donor, Request, Bank } from '@/lib/data';
 import { toast } from '@/hooks/use-toast';
 
 interface AppContextType {
@@ -26,22 +26,6 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const initializeData = async (path: string, mockData: any[]) => {
-    const dataRef = ref(database, path);
-    const snapshot = await get(dataRef);
-    if (!snapshot.exists() || !snapshot.hasChildren()) {
-        console.log(`No data found at ${path}, populating with mock data.`);
-        const updates: { [key: string]: any } = {};
-        mockData.forEach(item => {
-            const newKey = push(ref(database, path)).key;
-            if(newKey) {
-                updates[newKey] = item;
-            }
-        });
-        await set(dataRef, updates);
-    }
-};
-
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [donors, setDonors] = useState<Donor[]>([]);
@@ -53,45 +37,33 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setCurrentUser(user);
     });
 
-    const initAndListen = async () => {
-      await initializeData('donors', mockDonors);
-      await initializeData('requests', mockRequests);
-      await initializeData('banks', mockBanks);
+    const donorsRef = ref(database, 'donors');
+    const requestsRef = ref(database, 'requests');
+    const banksRef = ref(database, 'banks');
 
-      const donorsRef = ref(database, 'donors');
-      const requestsRef = ref(database, 'requests');
-      const banksRef = ref(database, 'banks');
+    const donorsUnsubscribe = onValue(donorsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedDonors = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+      setDonors(loadedDonors);
+    });
 
-      const donorsUnsubscribe = onValue(donorsRef, (snapshot) => {
-        const data = snapshot.val();
-        const loadedDonors = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
-        setDonors(loadedDonors);
-      });
+    const requestsUnsubscribe = onValue(requestsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedRequests = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+      setRequests(loadedRequests);
+    });
 
-      const requestsUnsubscribe = onValue(requestsRef, (snapshot) => {
-        const data = snapshot.val();
-        const loadedRequests = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
-        setRequests(loadedRequests);
-      });
-
-      const banksUnsubscribe = onValue(banksRef, (snapshot) => {
-        const data = snapshot.val();
-        const loadedBanks = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
-        setBanks(loadedBanks);
-      });
-      
-      return () => {
-        donorsUnsubscribe();
-        requestsUnsubscribe();
-        banksUnsubscribe();
-      };
-    };
+    const banksUnsubscribe = onValue(banksRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedBanks = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+      setBanks(loadedBanks);
+    });
     
-    const dataUnsubscribePromise = initAndListen();
-
     return () => {
-        unsubscribeAuth();
-        dataUnsubscribePromise.then(unsub => unsub && unsub());
+      unsubscribeAuth();
+      donorsUnsubscribe();
+      requestsUnsubscribe();
+      banksUnsubscribe();
     };
   }, []);
 
