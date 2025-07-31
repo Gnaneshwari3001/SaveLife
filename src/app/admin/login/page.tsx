@@ -15,7 +15,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Droplet } from "lucide-react"
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { toast } from "@/hooks/use-toast"
 
 export default function AdminLoginPage() {
@@ -27,7 +28,6 @@ export default function AdminLoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true);
-    const auth = getAuth();
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast({
