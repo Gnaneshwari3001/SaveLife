@@ -96,7 +96,7 @@ export default function SignInPage() {
                 </Link>
              </div>
           </form>
-        </Content>
+        </CardContent>
       </Card>
     </div>
   )
