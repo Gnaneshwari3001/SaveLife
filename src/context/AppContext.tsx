@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { database, auth } from '@/lib/firebase';
-import { ref, onValue, push, set, get, update } from 'firebase/database';
+import { ref, onValue, push, set, get, update, remove } from 'firebase/database';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { mockDonors, mockRequests, mockBanks, Donor, Request, Bank } from '@/lib/data';
 import { toast } from '@/hooks/use-toast';
@@ -14,7 +14,11 @@ interface AppContextType {
   requests: Request[];
   banks: Bank[];
   addDonor: (donor: Omit<Donor, 'id'>) => void;
+  updateDonor: (id: string, donor: Omit<Donor, 'id'>) => void;
+  deleteDonor: (id: string) => void;
   addRequest: (request: Omit<Request, 'id' | 'status'>) => void;
+  updateRequest: (id: string, request: Omit<Request, 'id'>) => void;
+  deleteRequest: (id: string) => void;
   updateRequestStatus: (id: string, status: 'Pending' | 'Fulfilled') => void;
   addBank: (bank: Omit<Bank, 'id'>) => void;
   userSignOut: () => Promise<void>;
@@ -97,6 +101,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const newDonorRef = push(donorsRef);
     set(newDonorRef, donor);
   };
+  
+  const updateDonor = (id: string, donor: Omit<Donor, 'id'>) => {
+    const donorRef = ref(database, `donors/${id}`);
+    update(donorRef, donor);
+  };
+  
+  const deleteDonor = (id: string) => {
+    const donorRef = ref(database, `donors/${id}`);
+    remove(donorRef);
+  }
 
   const addRequest = (request: Omit<Request, 'id' | 'status'>) => {
     const requestsRef = ref(database, 'requests');
@@ -106,6 +120,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       status: 'Pending' as const,
     });
   };
+
+  const updateRequest = (id: string, request: Omit<Request, 'id'>) => {
+    const requestRef = ref(database, `requests/${id}`);
+    update(requestRef, request);
+  }
+
+  const deleteRequest = (id: string) => {
+    const requestRef = ref(database, `requests/${id}`);
+    remove(requestRef);
+  }
 
   const updateRequestStatus = (id: string, status: 'Pending' | 'Fulfilled') => {
     const requestRef = ref(database, `requests/${id}`);
@@ -128,7 +152,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AppContext.Provider value={{ currentUser, donors, requests, banks, addDonor, addRequest, updateRequestStatus, addBank, userSignOut }}>
+    <AppContext.Provider value={{ currentUser, donors, requests, banks, addDonor, updateDonor, deleteDonor, addRequest, updateRequest, deleteRequest, updateRequestStatus, addBank, userSignOut }}>
       {children}
     </AppContext.Provider>
   );
