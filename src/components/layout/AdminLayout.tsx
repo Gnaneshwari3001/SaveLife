@@ -18,7 +18,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { Droplet, LayoutDashboard, Users, Heart, Building, LogOut } from "lucide-react"
-import { getAuth, signOut } from "firebase/auth"
+import { signOut } from "firebase/auth"
+import { auth } from "@/lib/firebase"
 import { toast } from "@/hooks/use-toast"
 
 const adminNavLinks = [
@@ -33,7 +34,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter()
 
   const handleSignOut = async () => {
-    const auth = getAuth()
     try {
       await signOut(auth)
       toast({
