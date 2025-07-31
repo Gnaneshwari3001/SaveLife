@@ -2,11 +2,14 @@
 "use client"
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { database } from '@/lib/firebase';
-import { ref, onValue, push, set, get } from 'firebase/database';
+import { database, auth } from '@/lib/firebase';
+import { ref, onValue, push, set, get, update } from 'firebase/database';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { mockDonors, mockRequests, mockBanks, Donor, Request, Bank } from '@/lib/data';
+import { toast } from '@/hooks/use-toast';
 
 interface AppContextType {
+  currentUser: User | null;
   donors: Donor[];
   requests: Request[];
   banks: Bank[];
@@ -14,6 +17,7 @@ interface AppContextType {
   addRequest: (request: Omit<Request, 'id' | 'status'>) => void;
   updateRequestStatus: (id: string, status: 'Pending' | 'Fulfilled') => void;
   addBank: (bank: Omit<Bank, 'id'>) => void;
+  userSignOut: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -35,11 +39,16 @@ const initializeData = async (path: string, mockData: any[]) => {
 };
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [donors, setDonors] = useState<Donor[]>([]);
   const [requests, setRequests] = useState<Request[]>([]);
   const [banks, setBanks] = useState<Bank[]>([]);
 
   useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+        setCurrentUser(user);
+    });
+
     const initAndListen = async () => {
       await initializeData('donors', mockDonors);
       await initializeData('requests', mockRequests);
@@ -74,8 +83,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       };
     };
     
-    initAndListen();
+    const dataUnsubscribePromise = initAndListen();
 
+    return () => {
+        unsubscribeAuth();
+        dataUnsubscribePromise.then(unsub => unsub && unsub());
+    };
   }, []);
 
 
@@ -105,8 +118,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     set(newBankRef, bank);
   };
 
+  const userSignOut = async () => {
+    try {
+        await signOut(auth);
+        toast({ title: 'Signed Out', description: 'You have been successfully signed out.' });
+    } catch (error) {
+        toast({ title: 'Error', description: 'Failed to sign out.', variant: 'destructive' });
+    }
+  }
+
   return (
-    <AppContext.Provider value={{ donors, requests, banks, addDonor, addRequest, updateRequestStatus, addBank }}>
+    <AppContext.Provider value={{ currentUser, donors, requests, banks, addDonor, addRequest, updateRequestStatus, addBank, userSignOut }}>
       {children}
     </AppContext.Provider>
   );

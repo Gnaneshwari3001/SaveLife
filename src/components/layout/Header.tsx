@@ -1,12 +1,22 @@
+
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Droplet, Menu } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { Droplet, Menu, User } from "lucide-react"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import { useAppContext } from "@/context/AppContext"
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -20,6 +30,13 @@ const navLinks = [
 
 export default function Header() {
   const pathname = usePathname()
+  const { currentUser, userSignOut } = useAppContext();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await userSignOut();
+    router.push('/');
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -45,9 +62,33 @@ export default function Header() {
           ))}
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <Link href="/admin/login" className="hidden md:inline-block">
-             <Button variant="ghost">Admin Panel</Button>
-          </Link>
+           {currentUser ? (
+             <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary" size="icon" className="rounded-full">
+                  <User className="h-5 w-5" />
+                  <span className="sr-only">Toggle user menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{currentUser.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push('/admin/dashboard')}>Dashboard</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+             <div className="hidden md:flex items-center space-x-2">
+              <Link href="/signin">
+                <Button variant="ghost">Sign In</Button>
+              </Link>
+              <Link href="/signup">
+                <Button>Sign Up</Button>
+              </Link>
+            </div>
+          )}
+          
           <ThemeToggle />
           <Sheet>
             <SheetTrigger asChild>
@@ -74,9 +115,14 @@ export default function Header() {
                     {link.label}
                   </Link>
                 ))}
-                 <Link href="/admin/login">
-                    <Button variant="outline" className="w-full">Admin Panel</Button>
-                 </Link>
+                 {currentUser ? (
+                    <Button variant="outline" className="w-full" onClick={handleSignOut}>Sign Out</Button>
+                 ) : (
+                   <div className="grid gap-2">
+                    <Link href="/signin"><Button className="w-full">Sign In</Button></Link>
+                    <Link href="/signup"><Button variant="outline" className="w-full">Sign Up</Button></Link>
+                   </div>
+                 )}
               </div>
             </SheetContent>
           </Sheet>
