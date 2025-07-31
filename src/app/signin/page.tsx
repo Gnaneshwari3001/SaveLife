@@ -21,8 +21,8 @@ import { toast } from "@/hooks/use-toast"
 
 export default function SignInPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("donor@example.com");
+  const [password, setPassword] = useState("donor123");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
