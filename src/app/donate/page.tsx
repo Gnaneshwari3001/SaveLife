@@ -30,6 +30,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAppContext } from "@/context/AppContext";
 import type { Donor } from "@/lib/data";
 import { sendDonorConfirmationEmail } from "@/ai/flows/send-email-flow";
+import { sendAdminNewDonorNotification } from "@/ai/flows/send-admin-notification-flow";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -81,7 +82,16 @@ export default function DonatePage() {
       addDonor(newDonor);
 
       try {
+        // Send confirmation to donor
         await sendDonorConfirmationEmail({name: values.name, email: values.email});
+        
+        // Send notification to admin
+        await sendAdminNewDonorNotification({
+          name: values.name, 
+          email: values.email, 
+          bloodGroup: values.bloodGroup
+        });
+
         toast({
           title: "Registration Successful!",
           description: `Thank you, ${values.name}. Your submission has been received.`,
@@ -93,6 +103,7 @@ export default function DonatePage() {
           description: `Thank you, ${values.name}. Your donation form has been submitted. We will contact you shortly.`,
           variant: "default"
         })
+        console.error("Failed to send one or more emails:", error);
       }
       
       form.reset();
