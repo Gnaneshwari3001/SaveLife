@@ -21,6 +21,8 @@ import { Droplet, LayoutDashboard, Users, Heart, Building, LogOut } from "lucide
 import { signOut } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { toast } from "@/hooks/use-toast"
+import { useAppContext } from "@/context/AppContext"
+import { useEffect } from "react"
 
 const adminNavLinks = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -32,6 +34,20 @@ const adminNavLinks = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
+  const { currentUser } = useAppContext();
+
+  useEffect(() => {
+    if (currentUser === null) {
+        router.push("/admin/login");
+    } else if (currentUser?.email !== "admin@example.com") {
+        toast({
+            title: "Access Denied",
+            description: "You do not have permission to view this page.",
+            variant: "destructive",
+        });
+        router.push("/");
+    }
+  }, [currentUser, router]);
 
   const handleSignOut = async () => {
     try {
@@ -48,6 +64,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         variant: "destructive",
       })
     }
+  }
+
+  if (currentUser?.email !== "admin@example.com") {
+    return (
+        <div className="flex justify-center items-center h-screen">
+            <p>Redirecting...</p>
+        </div>
+    );
   }
 
   return (

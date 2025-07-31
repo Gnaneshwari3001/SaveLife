@@ -33,10 +33,10 @@ export const mockDonors: Omit<Donor, 'id'>[] = [
   { name: 'Diana Miller', bloodGroup: 'AB+', lastDonation: '2023-12-15', email: 'diana@example.com', phone: '444-555-6666' },
 ];
 
-export const mockRequests: Omit<Request, 'id'>[] = [
-  { patientName: 'Eve Davis', bloodGroup: 'A+', units: 2, hospital: 'City General', status: 'Pending', urgency: 'Urgent' },
-  { patientName: 'Frank White', bloodGroup: 'O-', units: 1, hospital: 'St. Mary\'s', status: 'Pending', urgency: 'Standard' },
-  { patientName: 'Grace Lee', bloodGroup: 'B+', units: 3, hospital: 'County Hospital', status: 'Fulfilled', urgency: 'Urgent' },
+export const mockRequests: Omit<Request, 'id' | 'status'>[] = [
+  { patientName: 'Eve Davis', bloodGroup: 'A+', units: 2, hospital: 'City General', urgency: 'Urgent' },
+  { patientName: 'Frank White', bloodGroup: 'O-', units: 1, hospital: 'St. Mary\'s', urgency: 'Standard' },
+  { patientName: 'Grace Lee', bloodGroup: 'B+', units: 3, hospital: 'County Hospital', urgency: 'Urgent' },
 ];
 
 export const mockBanks: Omit<Bank, 'id'>[] = [

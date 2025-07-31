@@ -29,7 +29,7 @@ const initializeData = async (path: string, mockData: any[]) => {
         console.log(`No data found at ${path}, populating with mock data.`);
         const updates: { [key: string]: any } = {};
         mockData.forEach(item => {
-            const newKey = push(dataRef).key;
+            const newKey = push(ref(database, path)).key;
             if(newKey) {
                 updates[newKey] = item;
             }
