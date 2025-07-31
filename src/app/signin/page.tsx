@@ -90,13 +90,13 @@ export default function SignInPage() {
               {loading ? "Signing in..." : "Sign In"}
             </Button>
              <div className="mt-4 text-center text-sm">
-                Don&apos;t have an account?{" "}
+                Don't have an account?{" "}
                 <Link href="/signup" className="underline">
                     Sign up
                 </Link>
              </div>
           </form>
-        </CardContent>
+        </Content>
       </Card>
     </div>
   )
