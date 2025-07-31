@@ -22,9 +22,9 @@ import { toast } from "@/hooks/use-toast"
 
 export default function SignUpPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [email, setEmail] = useState("admin@example.com");
+  const [password, setPassword] = useState("Admin@123");
+  const [confirmPassword, setConfirmPassword] = useState("Admin@123");
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -52,7 +52,8 @@ export default function SignUpPage() {
         description: "You have been successfully registered.",
       });
       router.push("/");
-    } catch (error: any) {
+    } catch (error: any)
+{
       console.error("Firebase Authentication Error:", error);
       toast({
         title: "Sign Up Failed",
