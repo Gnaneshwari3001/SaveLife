@@ -20,12 +20,16 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 const initializeData = async (path: string, mockData: any[]) => {
     const dataRef = ref(database, path);
     const snapshot = await get(dataRef);
-    if (!snapshot.exists()) {
+    if (!snapshot.exists() || Object.keys(snapshot.val()).length === 0) {
         console.log(`No data found at ${path}, populating with mock data.`);
+        const updates: { [key: string]: any } = {};
         mockData.forEach(item => {
-            const newItemRef = push(dataRef);
-            set(newItemRef, item);
+            const newKey = push(dataRef).key;
+            if(newKey) {
+                updates[newKey] = item;
+            }
         });
+        await set(dataRef, updates);
     }
 };
 
@@ -35,52 +39,43 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [banks, setBanks] = useState<Bank[]>([]);
 
   useEffect(() => {
-    const init = async () => {
+    const initAndListen = async () => {
+      // Initialize data only if needed, then set up listeners
       await initializeData('donors', mockDonors);
       await initializeData('requests', mockRequests);
       await initializeData('banks', mockBanks);
+
+      const donorsRef = ref(database, 'donors');
+      const requestsRef = ref(database, 'requests');
+      const banksRef = ref(database, 'banks');
+
+      const donorsListener = onValue(donorsRef, (snapshot) => {
+        const data = snapshot.val();
+        const loadedDonors = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+        setDonors(loadedDonors);
+      });
+
+      const requestsListener = onValue(requestsRef, (snapshot) => {
+        const data = snapshot.val();
+        const loadedRequests = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+        setRequests(loadedRequests);
+      });
+
+      const banksListener = onValue(banksRef, (snapshot) => {
+        const data = snapshot.val();
+        const loadedBanks = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+        setBanks(loadedBanks);
+      });
+      
+      return () => {
+        donorsListener();
+        requestsListener();
+        banksListener();
+      };
     };
-    init();
+    
+    initAndListen();
 
-    const donorsRef = ref(database, 'donors');
-    const requestsRef = ref(database, 'requests');
-    const banksRef = ref(database, 'banks');
-
-    const donorsListener = onValue(donorsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const donorsList = Object.keys(data).map(key => ({ ...data[key], id: key }));
-        setDonors(donorsList);
-      } else {
-        setDonors([]);
-      }
-    });
-
-    const requestsListener = onValue(requestsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const requestsList = Object.keys(data).map(key => ({ ...data[key], id: key }));
-        setRequests(requestsList);
-      } else {
-        setRequests([]);
-      }
-    });
-
-    const banksListener = onValue(banksRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const banksList = Object.keys(data).map(key => ({ ...data[key], id: key }));
-        setBanks(banksList);
-      } else {
-        setBanks([]);
-      }
-    });
-
-    return () => {
-      donorsListener();
-      requestsListener();
-      banksListener();
-    };
   }, []);
 
 
