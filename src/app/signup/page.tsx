@@ -98,7 +98,8 @@ export default function SignUpPage() {
                 <Label htmlFor="password">Password</Label>
               <Input 
                 id="password" 
-                type="password" 
+                type="password"
+                placeholder="********" 
                 required 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -109,7 +110,8 @@ export default function SignUpPage() {
                 <Label htmlFor="confirm-password">Confirm Password</Label>
               <Input 
                 id="confirm-password" 
-                type="password" 
+                type="password"
+                placeholder="********" 
                 required 
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}

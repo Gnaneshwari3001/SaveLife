@@ -22,8 +22,8 @@ import { toast } from "@/hooks/use-toast"
 
 export default function SignInPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("donor@example.com");
-  const [password, setPassword] = useState("donor123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -98,7 +98,8 @@ export default function SignInPage() {
               </div>
               <Input 
                 id="password" 
-                type="password" 
+                type="password"
+                placeholder="********" 
                 required 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
