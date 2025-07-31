@@ -1,6 +1,6 @@
 'use server'
 
-import sgMail from '@sendgrid/mail';
+import nodemailer from 'nodemailer';
 import 'dotenv/config';
 
 export interface MailOptions {
@@ -10,40 +10,46 @@ export interface MailOptions {
 }
 
 /**
- * Sends an email using the SendGrid API.
+ * Sends an email using Nodemailer.
  * @param mailOptions - The options for the email.
  * @returns A promise that resolves when the email is sent.
  */
 export async function sendMail({ to, subject, body }: MailOptions) {
-  if (!process.env.SENDGRID_API_KEY || !process.env.EMAIL_FROM) {
-    console.error("SendGrid API Key or From Email is not configured in .env file. Skipping email sending.");
+  const { 
+    EMAIL_SERVER_HOST, 
+    EMAIL_SERVER_PORT, 
+    EMAIL_SERVER_USER, 
+    EMAIL_SERVER_PASSWORD, 
+    EMAIL_FROM 
+  } = process.env;
+
+  if (!EMAIL_SERVER_HOST || !EMAIL_SERVER_PORT || !EMAIL_SERVER_USER || !EMAIL_SERVER_PASSWORD || !EMAIL_FROM) {
+    console.error("Email server environment variables are not configured. Skipping email sending.");
     throw new Error('Email service is not configured. Please check your environment variables.');
   }
 
-  // Set the API key right before sending the email.
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  const transporter = nodemailer.createTransport({
+    host: EMAIL_SERVER_HOST,
+    port: parseInt(EMAIL_SERVER_PORT, 10),
+    secure: parseInt(EMAIL_SERVER_PORT, 10) === 465, // true for 465, false for other ports
+    auth: {
+      user: EMAIL_SERVER_USER,
+      pass: EMAIL_SERVER_PASSWORD,
+    },
+  });
 
-  const msg = {
+  const mailOptions = {
+    from: `LifeStream Portal <${EMAIL_FROM}>`,
     to: to,
-    from: process.env.EMAIL_FROM, // This must be a verified sender in your SendGrid account
     subject: subject,
     html: body,
   };
 
   try {
-    const response = await sgMail.send(msg);
-    console.log('Email sent successfully! Status Code:', response[0].statusCode);
-    return response;
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully!', info);
+    return info;
   } catch (error) {
-    console.error('Error sending email via SendGrid:');
-    
-    // Log more detailed error information from SendGrid if available
-    if ((error as any).response) {
-      console.error(JSON.stringify((error as any).response.body, null, 2));
-    } else {
-      console.error(error);
-    }
-    
+    console.error('Error sending email via Nodemailer:', error);
     throw new Error('Failed to send email. Check server logs for details.');
-  }
-}
+  
