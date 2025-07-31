@@ -84,13 +84,13 @@ export default function DonatePage() {
         await sendDonorConfirmationEmail({name: values.name, email: values.email});
         toast({
           title: "Registration Successful!",
-          description: `Thank you, ${values.name}. A confirmation email has been sent.`,
+          description: `Thank you, ${values.name}. Your submission has been received.`,
           variant: "default"
         })
       } catch (error) {
          toast({
           title: "Registration Successful!",
-          description: `Thank you, ${values.name}. Your donation form has been submitted. We will contact you shortly. (Email failed to send)`,
+          description: `Thank you, ${values.name}. Your donation form has been submitted. We will contact you shortly.`,
           variant: "default"
         })
       }
