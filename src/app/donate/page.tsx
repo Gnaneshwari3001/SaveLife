@@ -54,7 +54,7 @@ const formSchema = z.object({
 
 export default function DonatePage() {
   const [isEligible, setIsEligible] = useState<boolean | null>(null);
-  const { addDonor } = useAppContext();
+  const { addDonor, currentUser } = useAppContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,11 +69,21 @@ export default function DonatePage() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!currentUser) {
+        toast({
+            title: "Not Logged In",
+            description: "You must be logged in to register as a donor.",
+            variant: "destructive",
+        });
+        return;
+    }
+
     const canDonate = values.age >= 18 && values.age <= 65 && isBefore(values.lastDonationDate, addDays(new Date(), -56));
     setIsEligible(canDonate);
 
     if (canDonate) {
       const newDonor: Omit<Donor, 'id'> = {
+        userId: currentUser.uid,
         name: values.name,
         bloodGroup: values.bloodGroup,
         lastDonation: format(values.lastDonationDate, "yyyy-MM-dd"),
@@ -83,10 +93,7 @@ export default function DonatePage() {
       addDonor(newDonor);
 
       try {
-        // Send confirmation to donor
         await sendDonorConfirmationEmail({name: values.name, email: values.email});
-        
-        // Send notification to admin
         await sendAdminNewDonorNotification({
           name: values.name, 
           email: values.email, 

@@ -36,7 +36,7 @@ const formSchema = z.object({
 });
 
 export default function RequestPage() {
-  const { addRequest } = useAppContext();
+  const { addRequest, currentUser } = useAppContext();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,7 +50,17 @@ export default function RequestPage() {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!currentUser) {
+        toast({
+            title: "Not Logged In",
+            description: "You must be logged in to make a blood request.",
+            variant: "destructive",
+        });
+        return;
+    }
+
     const newRequest: Omit<Request, 'id' | 'status'> = {
+        userId: currentUser.uid,
         patientName: values.name,
         bloodGroup: values.bloodGroup,
         units: values.quantity,
