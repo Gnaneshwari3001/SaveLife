@@ -8,8 +8,15 @@ import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { Donor, Request, Bank } from '@/lib/data';
 import { toast } from '@/hooks/use-toast';
 
+interface UserProfile {
+  email: string;
+  role: 'admin' | 'user';
+  createdAt: string;
+}
+
 interface AppContextType {
   currentUser: User | null;
+  userProfile: UserProfile | null;
   donors: Donor[];
   requests: Request[];
   banks: Bank[];
@@ -28,13 +35,27 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [donors, setDonors] = useState<Donor[]>([]);
   const [requests, setRequests] = useState<Request[]>([]);
   const [banks, setBanks] = useState<Bank[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
         setCurrentUser(user);
+        if (user) {
+            const userRef = ref(database, 'users/' + user.uid);
+            const snapshot = await get(userRef);
+            if (snapshot.exists()) {
+                setUserProfile(snapshot.val() as UserProfile);
+            } else {
+                setUserProfile(null);
+            }
+        } else {
+            setUserProfile(null);
+        }
+        setLoading(false);
     });
 
     const donorsRef = ref(database, 'donors');
@@ -122,10 +143,27 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         toast({ title: 'Error', description: 'Failed to sign out.', variant: 'destructive' });
     }
   }
+  
+  const value = {
+    currentUser,
+    userProfile,
+    donors,
+    requests,
+    banks,
+    addDonor,
+    updateDonor,
+    deleteDonor,
+    addRequest,
+    updateRequest,
+    deleteRequest,
+    updateRequestStatus,
+    addBank,
+    userSignOut
+  };
 
   return (
-    <AppContext.Provider value={{ currentUser, donors, requests, banks, addDonor, updateDonor, deleteDonor, addRequest, updateRequest, deleteRequest, updateRequestStatus, addBank, userSignOut }}>
-      {children}
+    <AppContext.Provider value={value}>
+      {!loading && children}
     </AppContext.Provider>
   );
 };

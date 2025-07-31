@@ -30,7 +30,7 @@ const navLinks = [
 
 export default function Header() {
   const pathname = usePathname()
-  const { currentUser, userSignOut } = useAppContext();
+  const { currentUser, userProfile, userSignOut } = useAppContext();
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -38,7 +38,7 @@ export default function Header() {
     router.push('/');
   }
 
-  const isAdmin = currentUser?.email === 'admin@example.com';
+  const isAdmin = userProfile?.role === 'admin';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

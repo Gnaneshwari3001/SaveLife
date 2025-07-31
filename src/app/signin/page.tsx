@@ -16,7 +16,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Droplet } from "lucide-react"
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, database } from "@/lib/firebase";
+import { ref, get } from "firebase/database";
 import { toast } from "@/hooks/use-toast"
 
 export default function SignInPage() {
@@ -29,14 +30,32 @@ export default function SignInPage() {
     e.preventDefault()
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      toast({
-        title: "Login Successful",
-        description: "Welcome back!",
-      });
-      router.push("/");
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      const userRef = ref(database, 'users/' + user.uid);
+      const snapshot = await get(userRef);
+
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        const role = userData.role;
+
+        toast({
+            title: "Login Successful",
+            description: "Welcome back!",
+        });
+        
+        if (role === 'admin') {
+            router.push("/admin/dashboard");
+        } else {
+            router.push("/dashboard");
+        }
+      } else {
+        throw new Error("User role not found.");
+      }
+
     } catch (error: any) {
-      console.error("Firebase Authentication Error:", error);
+      console.error("Authentication Error:", error);
       toast({
         title: "Login Failed",
         description: error.message || "Please check your credentials and try again.",

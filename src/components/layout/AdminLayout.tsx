@@ -34,12 +34,12 @@ const adminNavLinks = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
-  const { currentUser } = useAppContext();
+  const { userProfile } = useAppContext();
 
   useEffect(() => {
-    if (currentUser === null) {
+    if (!userProfile) {
         router.push("/admin/login");
-    } else if (currentUser?.email !== "admin@example.com") {
+    } else if (userProfile.role !== "admin") {
         toast({
             title: "Access Denied",
             description: "You do not have permission to view this page.",
@@ -47,7 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         });
         router.push("/");
     }
-  }, [currentUser, router]);
+  }, [userProfile, router]);
 
   const handleSignOut = async () => {
     try {
@@ -66,7 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }
 
-  if (currentUser?.email !== "admin@example.com") {
+  if (userProfile?.role !== "admin") {
     return (
         <div className="flex justify-center items-center h-screen">
             <p>Redirecting...</p>

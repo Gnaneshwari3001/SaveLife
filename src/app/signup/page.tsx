@@ -22,9 +22,9 @@ import { toast } from "@/hooks/use-toast"
 
 export default function SignUpPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("admin@example.com");
-  const [password, setPassword] = useState("Admin@123");
-  const [confirmPassword, setConfirmPassword] = useState("Admin@123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -41,9 +41,12 @@ export default function SignUpPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      const role = email === "admin@example.com" ? "admin" : "user";
+
       // Store user data in Realtime Database
       await set(ref(database, 'users/' + user.uid), {
         email: user.email,
+        role: role,
         createdAt: new Date().toISOString(),
       });
       
