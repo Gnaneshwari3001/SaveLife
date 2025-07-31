@@ -1,5 +1,7 @@
-import { initializeApp } from 'firebase/app';
+
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
+import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
   projectId: "savelife-vyo4b",
@@ -12,7 +14,9 @@ const firebaseConfig = {
   databaseURL: "https://savelife-vyo4b-default-rtdb.firebaseio.com",
 };
 
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const database = getDatabase(app);
+const auth = getAuth(app);
 
-export { database };
+export { app, database, auth };

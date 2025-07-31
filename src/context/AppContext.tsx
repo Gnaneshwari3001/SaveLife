@@ -1,8 +1,9 @@
+
 "use client"
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { database } from '@/lib/firebase';
-import { ref, onValue, push, set, update, get } from 'firebase/database';
+import { ref, onValue, push, set, get } from 'firebase/database';
 import { mockDonors, mockRequests, mockBanks, Donor, Request, Bank } from '@/lib/data';
 
 interface AppContextType {
@@ -20,7 +21,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 const initializeData = async (path: string, mockData: any[]) => {
     const dataRef = ref(database, path);
     const snapshot = await get(dataRef);
-    if (!snapshot.exists() || Object.keys(snapshot.val()).length === 0) {
+    if (!snapshot.exists() || !snapshot.hasChildren()) {
         console.log(`No data found at ${path}, populating with mock data.`);
         const updates: { [key: string]: any } = {};
         mockData.forEach(item => {
@@ -40,7 +41,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const initAndListen = async () => {
-      // Initialize data only if needed, then set up listeners
       await initializeData('donors', mockDonors);
       await initializeData('requests', mockRequests);
       await initializeData('banks', mockBanks);
@@ -49,28 +49,28 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       const requestsRef = ref(database, 'requests');
       const banksRef = ref(database, 'banks');
 
-      const donorsListener = onValue(donorsRef, (snapshot) => {
+      const donorsUnsubscribe = onValue(donorsRef, (snapshot) => {
         const data = snapshot.val();
         const loadedDonors = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         setDonors(loadedDonors);
       });
 
-      const requestsListener = onValue(requestsRef, (snapshot) => {
+      const requestsUnsubscribe = onValue(requestsRef, (snapshot) => {
         const data = snapshot.val();
         const loadedRequests = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         setRequests(loadedRequests);
       });
 
-      const banksListener = onValue(banksRef, (snapshot) => {
+      const banksUnsubscribe = onValue(banksRef, (snapshot) => {
         const data = snapshot.val();
         const loadedBanks = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
         setBanks(loadedBanks);
       });
       
       return () => {
-        donorsListener();
-        requestsListener();
-        banksListener();
+        donorsUnsubscribe();
+        requestsUnsubscribe();
+        banksUnsubscribe();
       };
     };
     

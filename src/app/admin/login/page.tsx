@@ -1,5 +1,7 @@
+
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -13,15 +15,36 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Droplet } from "lucide-react"
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { toast } from "@/hooks/use-toast"
 
 export default function AdminLoginPage() {
   const router = useRouter()
+  const [email, setEmail] = useState("admin@example.com");
+  const [password, setPassword] = useState("password");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    // In a real app, you'd have auth logic here.
-    // For now, we just redirect.
-    router.push("/admin/dashboard")
+    setLoading(true);
+    const auth = getAuth();
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({
+        title: "Login Successful",
+        description: "Redirecting to dashboard...",
+      });
+      router.push("/admin/dashboard");
+    } catch (error: any) {
+      console.error("Firebase Authentication Error:", error);
+      toast({
+        title: "Login Failed",
+        description: error.message || "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -45,17 +68,26 @@ export default function AdminLoginPage() {
                 type="email"
                 placeholder="admin@example.com"
                 required
-                defaultValue="admin@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
               />
             </div>
             <div className="grid gap-2">
               <div className="flex items-center">
                 <Label htmlFor="password">Password</Label>
               </div>
-              <Input id="password" type="password" required defaultValue="password" />
+              <Input 
+                id="password" 
+                type="password" 
+                required 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+              />
             </div>
-            <Button type="submit" className="w-full">
-              Login
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Logging in..." : "Login"}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">

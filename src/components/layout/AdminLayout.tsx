@@ -1,7 +1,8 @@
+
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   SidebarProvider,
   Sidebar,
@@ -17,6 +18,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { Droplet, LayoutDashboard, Users, Heart, Building, LogOut } from "lucide-react"
+import { getAuth, signOut } from "firebase/auth"
+import { toast } from "@/hooks/use-toast"
 
 const adminNavLinks = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -27,6 +30,25 @@ const adminNavLinks = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleSignOut = async () => {
+    const auth = getAuth()
+    try {
+      await signOut(auth)
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out.",
+      })
+      router.push("/admin/login")
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out.",
+        variant: "destructive",
+      })
+    }
+  }
 
   return (
     <SidebarProvider>
@@ -53,12 +75,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter>
-            <Link href="/" className="w-full">
-              <Button variant="ghost" className="w-full justify-start gap-2">
-                <LogOut className="h-5 w-5" />
-                Exit Admin
-              </Button>
-            </Link>
+            <Button variant="ghost" className="w-full justify-start gap-2" onClick={handleSignOut}>
+              <LogOut className="h-5 w-5" />
+              Sign Out
+            </Button>
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>
