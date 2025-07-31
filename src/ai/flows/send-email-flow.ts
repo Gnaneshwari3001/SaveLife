@@ -3,17 +3,11 @@
  * @fileOverview A flow for sending emails.
  *
  * - sendDonorConfirmationEmail - Sends a confirmation email to a new donor.
- * - EmailInput - The input type for the sendDonorConfirmationEmail function.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-export const EmailInputSchema = z.object({
-  name: z.string().describe('The name of the donor.'),
-  email: z.string().email().describe('The email address of the donor.'),
-});
-export type EmailInput = z.infer<typeof EmailInputSchema>;
+import { EmailInputSchema, type EmailInput } from '@/ai/schemas/email-schema';
 
 const emailPrompt = ai.definePrompt({
   name: 'sendDonorConfirmationEmailPrompt',
