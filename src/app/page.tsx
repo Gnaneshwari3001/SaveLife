@@ -1,6 +1,5 @@
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -18,24 +17,18 @@ const carouselItems = [
   {
     title: 'Be a Hero, Donate Blood Today',
     description: 'Your single donation can save up to three lives. Join our community of heroes.',
-    image: 'https://placehold.co/1200x600',
-    dataAiHint: 'blood donation',
     cta: 'Donate Now',
     link: '/donate',
   },
   {
     title: 'Urgent Need for O-Negative Blood',
     description: 'Universal donors are in high demand. Check your eligibility and help us now.',
-    image: 'https://placehold.co/1200x600',
-    dataAiHint: 'medical checkup',
     cta: 'Check Eligibility',
     link: '/eligibility',
   },
   {
     title: 'Request Blood for a Loved One',
     description: 'In need of blood? Our portal connects you with willing donors in your area.',
-    image: 'https://placehold.co/1200x600',
-    dataAiHint: 'happy family',
     cta: 'Request Blood',
     link: '/request',
   },
@@ -51,8 +44,8 @@ export default function HomePage() {
               {carouselItems.map((item, index) => (
                 <CarouselItem key={index}>
                   <div className="container px-4 md:px-6">
-                    <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-16 items-center">
-                      <div className="flex flex-col justify-center space-y-4">
+                    <div className="grid gap-6 lg:grid-cols-1 text-center">
+                      <div className="flex flex-col justify-center items-center space-y-4">
                         <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none font-headline">
                           {item.title}
                         </h1>
@@ -65,14 +58,6 @@ export default function HomePage() {
                           </Button>
                         </Link>
                       </div>
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        width={600}
-                        height={400}
-                        className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
-                        data-ai-hint={item.dataAiHint}
-                      />
                     </div>
                   </div>
                 </CarouselItem>
