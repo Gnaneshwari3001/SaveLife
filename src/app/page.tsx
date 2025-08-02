@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ const carouselItems = [
     title: 'Be a Hero, Donate Blood Today',
     description: 'Your single donation can save up to three lives. Join our community of heroes.',
     image: 'https://placehold.co/1200x600',
-    dataAiHint: 'hospital blood donation',
+    dataAiHint: 'blood donation',
     cta: 'Donate Now',
     link: '/donate',
   },
@@ -26,7 +27,7 @@ const carouselItems = [
     title: 'Urgent Need for O-Negative Blood',
     description: 'Universal donors are in high demand. Check your eligibility and help us now.',
     image: 'https://placehold.co/1200x600',
-    dataAiHint: 'medical laboratory',
+    dataAiHint: 'medical checkup',
     cta: 'Check Eligibility',
     link: '/eligibility',
   },
@@ -34,7 +35,7 @@ const carouselItems = [
     title: 'Request Blood for a Loved One',
     description: 'In need of blood? Our portal connects you with willing donors in your area.',
     image: 'https://placehold.co/1200x600',
-    dataAiHint: 'diverse community',
+    dataAiHint: 'happy family',
     cta: 'Request Blood',
     link: '/request',
   },
